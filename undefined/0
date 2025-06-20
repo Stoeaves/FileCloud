@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线工具管理系统</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #e6f0ff;
+            --secondary-color: #3a0ca3;
+            --text-color: #333;
+            --light-text: #666;
+            --border-color: #e0e0e0;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --sidebar-width: 250px;
+            --header-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 登录页面样式 */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+        }
+
+        .login-box {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            margin: 20px;
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--light-text);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* 管理界面样式 */
+        .admin-container {
+            display: none;
+            width: 100%;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            position: fixed;
+            height: 100vh;
+            transition: transform 0.3s ease-in-out;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .nav-menu {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            list-style: none;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--light-text);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 20px;
+            transition: margin-left 0.3s;
+        }
+
+        /* 头部样式 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .logout-btn:hover {
+            color: var(--primary-color);
+        }
+
+        /* 工具列表样式 */
+        .tools-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+
+        .tools-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .add-tool-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .add-tool-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .tools-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tools-table th, .tools-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tools-table th {
+            font-weight: 600;
+            color: var(--light-text);
+        }
+
+        .tools-table tr:hover {
+            background-color: var(--primary-light);
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            color: var(--light-text);
+            transition: color 0.3s;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-color);
+        }
+
+        /* 添加工具部分 */
+        .add-tool-form {
+            margin-top: 20px;
+        }
+
+        /* 移动端遮罩层 */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .login-box {
+                padding: 30px 20px;
+            }
+
+            .tools-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .add-tool-btn {
+                margin-top: 10px;
+                width: 100%;
+            }
+
+            .tools-table {
+                overflow-x: auto;
+            }
+
+            .sidebar {
+                width: 80%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div class="login-container" id="login-container">
+        <div class="login-box">
+            <h2 class="login-title">在线工具管理系统</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="password" id="token" class="form-control" placeholder="请输入Token">
+                    <div class="error-message" id="token-error"></div>
+                </div>
+                <button type="submit" class="btn">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理界面 -->
+    <div class="admin-container" id="admin-container">
+        <div class="container">
+            <!-- 移动端遮罩层 -->
+            <div class="sidebar-overlay" id="sidebar-overlay"></div>
+            
+            <!-- 侧边栏 -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">工具管理</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="tools-list">
+                            <i class="fas fa-list"></i>
+                            <span>工具列表</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="add-tool">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>添加工具</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" style="display: none">
+                        <a href="#" class="nav-link" data-section="edit-tool">
+                            <i class="fas fa-edit"></i>
+                            <span>编辑工具</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- 主内容区域 -->
+            <main class="main-content">
+                <div class="header">
+                    <h2 class="header-title">工具列表</h2>
+                </div>
+
+                <div class="tools-container" id="tools-list-section">
+                    <div class="tools-header">
+                        <h3>所有工具</h3>
+                        <button class="add-tool-btn" id="add-tool-btn">
+                            <i class="fas fa-plus"></i> 添加工具
+                        </button>
+                    </div>
+                    <table class="tools-table">
+                        <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>缩略图</th>
+                                <th>ID</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- 添加工具部分 (默认隐藏) -->
+                <div class="tools-container" id="add-tool-section" style="display: none;">
+                    <h3>添加新工具</h3>
+                    <form id="add-tool-form" class="add-tool-form">
+                        <div class="form-group">
+                            <label for="tool-name">工具名称</label>
+                            <input id="tool-name" class="form-control" rows="3" placeholder="输入工具名称">
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-icon">工具图标</label>
+                            <textarea type="text" id="tool-icon" class="form-control" placeholder="输入工具图标（BASE64化）"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-css">工具CSS</label>
+                            <textarea type="text" id="tool-css" class="form-control" placeholder="输入工具CSS"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-html">工具HTML</label>
+                            <textarea type="text" id="tool-html" class="form-control" placeholder="输入工具HTML"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-js">工具JS</label>
+                            <textarea type="text" id="tool-js" class="form-control" placeholder="输入工具JS"></textarea>
+                        </div>
+                        <button type="submit" class="btn">保存工具</button>
+                    </form>
+                </div>
+
+                <div class="tools-container" id="edit-tool-section" style="display: none;">
+                    <h3>编辑工具【<span id="tool-name"></span>】【ID：<span id="tool-id"></span>】</h3>
+                    <form id="edit-tool-form" class="edit-tool-form">
+                        <input type="hidden" id="tool-id">
+                        <div class="form-group">
+                            <label for="tool-name">工具名称</label>
+                            <input id="tool-name" class="form-control" placeholder="输入工具名称">
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-icon">工具图标</label>
+                            <textarea type="text" id="tool-icon" class="form-control" placeholder="输入工具图标（BASE64化）"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-css">工具CSS</label>
+                            <textarea type="text" id="tool-css" class="form-control" placeholder="输入工具CSS"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-html">工具HTML</label>
+                            <textarea type="text" id="tool-html" class="form-control" placeholder="输入工具HTML"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-js">工具JS</label>
+                            <textarea type="text" id="tool-js" class="form-control" placeholder="输入工具JS"></textarea>
+                        </div>
+                        <button type="submit" class="btn">保存工具</button>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(function() {
+            // 登录表单处理
+            const loginForm = document.getElementById('login-form');
+            const loginContainer = document.getElementById('login-container');
+            const adminContainer = document.getElementById('admin-container');
+            const tokenError = document.getElementById('token-error');
+            const logoutBtn = document.getElementById('logout-btn');
+            
+            // 侧边栏导航处理
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = {
+                'tools-list': document.getElementById('tools-list-section'),
+                'add-tool': document.getElementById('add-tool-section'),
+                'edit-tool': document.getElementById('edit-tool-section')
+            };
+            
+            // 移动端菜单切换
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const menuToggle = document.createElement('button');
+            menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            menuToggle.style.position = 'fixed';
+            menuToggle.style.top = '15px';
+            menuToggle.style.left = '15px';
+            menuToggle.style.zIndex = '101';
+            menuToggle.style.background = 'var(--primary-color)';
+            menuToggle.style.color = 'white';
+            menuToggle.style.border = 'none';
+            menuToggle.style.borderRadius = '50%';
+            menuToggle.style.width = '40px';
+            menuToggle.style.height = '40px';
+            menuToggle.style.display = 'none';
+            menuToggle.style.justifyContent = 'center';
+            menuToggle.style.alignItems = 'center';
+            menuToggle.style.cursor = 'pointer';
+            document.body.appendChild(menuToggle);
+            
+            // 检查窗口大小
+            function checkWindowSize() {
+                if (window.innerWidth <= 992) {
+                    menuToggle.style.display = 'flex';
+                } else {
+                    menuToggle.style.display = 'none';
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                }
+            }
+            
+            // 初始化检查
+            checkWindowSize();
+            
+            // 窗口大小改变时检查
+            window.addEventListener('resize', checkWindowSize);
+            
+            // 菜单切换点击事件
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.add('active');
+                sidebarOverlay.classList.add('active');
+            });
+            
+            // 遮罩层点击事件
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+            
+            // 登录表单提交
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                startLoading();
+
+                const token = localStorage.getItem("token") ? localStorage.getItem("token") : document.getElementById('token').value;
+                
+                // 重置错误信息
+                tokenError.style.display = 'none';
+
+                const formData = new FormData();
+                formData.append('token', token);
+                const request = await fetch(`https://tools-api.seave.top/checkAdmin`, {
+                    method: "POST",
+                    body: formData
+                });
+                const response = await request.json();
+                const data = response.data;
+
+                if (response.code === 400) window.close();
+
+                if (response.code === 200) {
+                    localStorage.setItem("token", token);
+                    loginContainer.style.display = 'none';
+                    adminContainer.style.display = 'block';
+
+                    // 刷新工具列表
+                    await refreshToolList();
+                    stopLoading();
+                }
+            });
+            
+            // 侧边栏导航点击事件
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有active类
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    
+                    // 添加当前active类
+                    this.classList.add('active');
+                    
+                    // 获取数据部分
+                    const section = this.getAttribute('data-section');
+                    
+                    // 隐藏所有部分
+                    Object.values(sections).forEach(sec => {
+                        sec.style.display = 'none';
+                    });
+                    
+                    // 显示选中的部分
+                    sections[section].style.display = 'block';
+                    
+                    // 更新标题
+                    document.querySelector('.header-title').textContent = this.querySelector('span').textContent;
+                    
+                    // 如果是移动端，点击后关闭侧边栏
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.remove('active');
+                        sidebarOverlay.classList.remove('active');
+                    }
+                });
+            });
+            
+            // 添加工具按钮点击事件
+            document.getElementById('add-tool-btn').addEventListener('click', function() {
+                // 移除所有active类
+                navLinks.forEach(l => l.classList.remove('active'));
+                
+                // 添加add-tool active类
+                document.querySelector('[data-section="add-tool"]').classList.add('active');
+                
+                // 隐藏所有部分
+                Object.values(sections).forEach(sec => {
+                    sec.style.display = 'none';
+                });
+                
+                // 显示添加工具部分
+                sections['add-tool'].style.display = 'block';
+                
+                // 更新标题
+                document.querySelector('.header-title').textContent = '添加工具';
+                
+                // 如果是移动端，点击后关闭侧边栏
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                }
+            });
+            
+            // 添加工具表单提交
+            document.getElementById('add-tool-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                startLoading(async ()=>{
+                    const name = document.querySelector("#add-tool-form #tool-name").value;
+                    const icon = document.querySelector("#add-tool-form #tool-icon").value;
+                    const css = document.querySelector("#add-tool-form #tool-css").value;
+                    const html = document.querySelector("#add-tool-form #tool-html").value;
+                    const js = document.querySelector("#add-tool-form #tool-js").value;
+
+                    const formData = new FormData();
+                    formData.append("token", localStorage.getItem("token"));
+                    formData.append('method', "PUT");
+                    formData.append('name', name);
+                    formData.append('icon', icon);
+                    formData.append('style', await encodeBase64(css));
+                    formData.append('html', await encodeBase64(html));
+                    formData.append('js', await encodeBase64(js));
+
+                    fetch(`https://tools-api.seave.top/toolManager`, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(async (data) => {
+                        if (data.code === 400) window.close();
+                        if (data.code === 200) {
+                            alert('添加成功');
+                            document.querySelector("#add-tool-form #tool-name").value=null;
+                            document.querySelector("#add-tool-form #tool-icon").value=null;
+                            document.querySelector("#add-tool-form #tool-css").value=null;
+                            document.querySelector("#add-tool-form #tool-html").value=null;
+                            document.querySelector("#add-tool-form #tool-js").value=null;
+                            // 返回工具列表
+                            document.querySelector('[data-section="tools-list"]').click();
+                            await refreshToolList();
+                            stopLoading();
+                        }
+                    })
+                    .catch(e=>{
+                        console.error(`添加失败：${e}`);
+                        alert(`添加失败：${e}`);
+                        stopLoading();
+                    });
+                });
+            });
+
+            document.getElementById('edit-tool-form').addEventListener('submit', async function (e){
+                e.preventDefault();
+
+                startLoading(async()=>{
+                    const id = document.querySelector("#edit-tool-form input#tool-id").value;
+                    const name = document.querySelector("#edit-tool-form #tool-name").value;
+                    const icon = document.querySelector("#edit-tool-form #tool-icon").value;
+                    const css = document.querySelector("#edit-tool-form #tool-css").value;
+                    const html = document.querySelector("#edit-tool-form #tool-html").value;
+                    const js = document.querySelector("#edit-tool-form #tool-js").value;
+
+                    const formData = new FormData();
+                    formData.append("token", localStorage.getItem("token"));
+                    formData.append('method', "POST");
+                    formData.append('id', id);
+                    formData.append('name', name);
+                    formData.append('icon', icon);
+                    formData.append('style', await encodeBase64(css));
+                    formData.append('html', await encodeBase64(html));
+                    formData.append('js', await encodeBase64(js));
+
+                    fetch(`https://tools-api.seave.top/toolManager`, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(async (data) => {
+                        if (data.code === 400) window.close();
+                        if (data.code === 200) {
+                            alert('修改成功');
+                            // 返回工具列表
+                            document.querySelector('[data-section="tools-list"]').click();
+                            await refreshToolList();
+                            stopLoading();
+                        }
+                    })
+                    .catch(e=>{
+                        console.error(`修改失败：${e}`);
+                        alert(`修改失败：${e}`);
+                        stopLoading();
+                    })
+                });
+            });
+        }, 100);
+
+        async function refreshToolList(){
+            document.querySelector(".tools-table tbody").innerHTML = ``;
+            const listReq = await fetch(`https://tools-api.seave.top/toolList`);
+            const listResponse = await listReq.json();
+            const list = listResponse.data;
+            list.forEach(element => {
+                const id = element.id;
+                const icon = element.icon;
+                const name = element.name;
+                document.querySelector(".tools-table tbody").innerHTML += `<tr><td>${name}</td><td><img src="${icon}" alt="${name}" height="32" /></td><td>${id}</td><td><button class="action-btn" title="编辑" onclick="editTool(${id})"><i class="fas fa-edit"></i></button></td></tr>`;
+            });
+        }
+
+        async function editTool(id){
+            startLoading();
+
+            const formData = new FormData();
+            formData.append("id", id);
+            
+            const request = await fetch(`https://tools-api.seave.top/getTool`, {
+                method: "POST",
+                body: formData
+            });
+
+            if (!request.ok){
+                console.error(`工具【${id}】获取失败：`, request.statusText);
+                alert(`工具【${id}】获取失败：${request.statusText}`);
+                return;
+            }
+
+            const response = await request.json();
+            if (response.code === 400) window.close();
+            const data = response.data;
+
+            document.querySelector("#edit-tool-section span#tool-name").innerHTML = data.name;
+            document.querySelector("#edit-tool-section span#tool-id").innerHTML = id;
+
+            document.querySelector("#edit-tool-section input#tool-name").value = data.name;
+            document.querySelector("#edit-tool-section input#tool-id").value = id;
+            document.querySelector("#edit-tool-section textarea#tool-icon").value = data.icon;
+            document.querySelector("#edit-tool-section textarea#tool-css").value = await decodeBase64(data.style);
+            document.querySelector("#edit-tool-section textarea#tool-html").value = await decodeBase64(data.html);
+            document.querySelector("#edit-tool-section textarea#tool-js").value = await decodeBase64(data.js);
+
+            document.querySelector('[data-section="edit-tool"]').click();
+            stopLoading();
+        }
+
+        async function encodeBase64(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            return btoa(String.fromCharCode(...new Uint8Array(data)));
+        }
+
+        async function decodeBase64(str) {
+            const binaryStr = atob(str);
+            const bytes = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+                bytes[i] = binaryStr.charCodeAt(i);
+            }
+            const decoder = new TextDecoder();
+            return decoder.decode(bytes);
+        }
+
+        function startLoading(callback = () => {}){
+            const loadContainer = document.createElement('div');
+            loadContainer.className = "loading-container";
+            loadContainer.style.position = "fixed";
+            loadContainer.style.top = "0";
+            loadContainer.style.left = "0";
+            loadContainer.style.width = "100%";
+            loadContainer.style.height = "100%";
+            loadContainer.style.display = "flex";
+            loadContainer.style.justifyContent = "center";
+            loadContainer.style.alignItems = "center";
+            loadContainer.style.backgroundColor = "rgb(0 0 0 / 15%)";
+            loadContainer.style.flexDirection = "column";
+            loadContainer.style.backdropFilter = "blur(2px)";
+            loadContainer.style.zIndex = "9999";
+
+            const loadIcon = document.createElement('div');
+            loadIcon.style.width = "60px";
+            loadIcon.style.height = "60px";
+            loadIcon.style.borderRadius = "50%";
+            loadIcon.style.border = "3px solid #f0f0f0";
+            loadIcon.style.borderTopColor = "#646cff";
+            loadIcon.style.animation = "rotate 1s cubic-bezier(0.4, 0.1, 0.4, 1) infinite";
+
+            const loadText = document.createElement('div');
+            loadText.textContent = "加载中";
+            loadText.style.fontSize = "14px";
+            loadText.style.marginTop = "20px";
+            loadText.style.color = "#1a1a1a";
+            loadText.style.letterSpacing = "0.5px";
+            loadText.style.fontWeight = "500";
+
+            const animation = document.createElement('style');
+            animation.innerHTML = `@keyframes rotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}`;
+
+            loadContainer.appendChild(animation);
+            loadContainer.appendChild(loadIcon);
+            loadContainer.appendChild(loadText);
+            document.body.appendChild(loadContainer);
+
+            callback();
+        }
+
+        function stopLoading(){
+            document.querySelector('.loading-container').remove();
+        }
+    </script>
+</body>
+</html>
